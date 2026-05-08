@@ -280,8 +280,13 @@ puzzles.forEach(p => {
   a.dataset.cats = p.cats.join(",");
 
   const tagsHtml = p.cats.map(c => `<span class="tag">${c}</span>`).join("");
-  const bestTime = scores[p.id];
-  const bestHtml = bestTime ? `<span class="best-time">Beste: ${bestTime}</span>` : "";
+  const lastType = scores[p.id + "_lastType"];
+  const lastTime = scores[p.id + "_lastTime"];
+  let bestHtml = "";
+  if (lastTime) {
+    const typeLabel = lastType && lastType !== "default" ? ` (${lastType})` : "";
+    bestHtml = `<span class="best-time">Laatst: ${lastTime}${typeLabel}</span>`;
+  }
 
   a.innerHTML = `<span class="icon">${p.icon}</span><span class="name">${p.name}</span><span class="desc">${p.desc}</span><div class="tags">${tagsHtml}</div>${bestHtml}`;
   grid.appendChild(a);

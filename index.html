@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Puzzels - wesl.nl</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,7 +17,7 @@
 
   header {
     text-align: center;
-    padding: 2.5rem 1rem 1.5rem;
+    padding: 2.5rem 1rem 1rem;
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     border-bottom: 1px solid #1e293b;
   }
@@ -50,12 +51,40 @@
     transition: border-color 0.2s;
   }
 
-  #search:focus {
-    border-color: #6366f1;
+  #search:focus { border-color: #6366f1; }
+  #search::placeholder { color: #64748b; }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 700px;
+    margin: 1.25rem auto 0;
+    padding: 0 1rem;
   }
 
-  #search::placeholder {
-    color: #64748b;
+  .filter-btn {
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .filter-btn:hover {
+    border-color: #6366f1;
+    color: #c7d2fe;
+  }
+
+  .filter-btn.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: #fff;
   }
 
   .grid {
@@ -64,7 +93,7 @@
     gap: 0.75rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 1rem;
   }
 
   .card {
@@ -88,20 +117,35 @@
     background: #253049;
   }
 
-  .card .icon {
-    font-size: 2rem;
-    line-height: 1;
-  }
-
-  .card .name {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
+  .card .icon { font-size: 2rem; line-height: 1; }
+  .card .name { font-weight: 600; font-size: 0.95rem; }
 
   .card .desc {
     font-size: 0.75rem;
     color: #94a3b8;
     line-height: 1.3;
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: center;
+    margin-top: 0.15rem;
+  }
+
+  .card .tag {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 8px;
+    background: #334155;
+    color: #94a3b8;
+  }
+
+  .card .best-time {
+    font-size: 0.7rem;
+    color: #a78bfa;
+    margin-top: 0.1rem;
   }
 
   footer {
@@ -128,6 +172,7 @@
   <div class="search-container">
     <input type="text" id="search" placeholder="Zoek een puzzel..." autocomplete="off">
   </div>
+  <div class="filters" id="filters"></div>
 </header>
 
 <div class="grid" id="grid"></div>
@@ -137,67 +182,112 @@
 </footer>
 
 <script>
+const categories = {
+  "Logica": "#818cf8",
+  "Getallen": "#f472b6",
+  "Patronen": "#34d399",
+  "Ruimtelijk": "#fb923c",
+  "Actie": "#facc15",
+  "Netwerk": "#38bdf8"
+};
+
 const puzzles = [
-  { id: "blackbox", name: "Black Box", icon: "⬛", desc: "Vind verborgen ballen door stralen te schieten" },
-  { id: "bridges", name: "Bridges", icon: "🌉", desc: "Verbind eilanden met bruggen" },
-  { id: "cube", name: "Cube", icon: "🟦", desc: "Rol een kubus over een grid" },
-  { id: "dominosa", name: "Dominosa", icon: "🎲", desc: "Leg dominostenen op het grid" },
-  { id: "fifteen", name: "Fifteen", icon: "🔢", desc: "Schuifpuzzel - sorteer de nummers" },
-  { id: "filling", name: "Filling", icon: "🟩", desc: "Vul het grid met getallen" },
-  { id: "flip", name: "Flip", icon: "🔄", desc: "Draai alle tegels naar dezelfde kleur" },
-  { id: "flood", name: "Flood", icon: "🎨", desc: "Kleur het hele bord in zo min mogelijk zetten" },
-  { id: "galaxies", name: "Galaxies", icon: "🌌", desc: "Verdeel het grid in symmetrische gebieden" },
-  { id: "guess", name: "Guess", icon: "🧠", desc: "Raad de kleurcode (Mastermind)" },
-  { id: "inertia", name: "Inertia", icon: "💎", desc: "Verzamel edelstenen, vermijd mijnen" },
-  { id: "keen", name: "Keen", icon: "✖️", desc: "Latijns vierkant met rekenkundige hints" },
-  { id: "lightup", name: "Light Up", icon: "💡", desc: "Plaats lampen om het hele grid te verlichten" },
-  { id: "loopy", name: "Loopy", icon: "➰", desc: "Teken een enkele lus langs de randen" },
-  { id: "magnets", name: "Magnets", icon: "🧲", desc: "Plaats magneten met + en - polen" },
-  { id: "map", name: "Map", icon: "🗺️", desc: "Kleur de kaart met vier kleuren" },
-  { id: "mines", name: "Mines", icon: "💣", desc: "Klassiek mijnenveger" },
-  { id: "mosaic", name: "Mosaic", icon: "🟪", desc: "Vul een mozaïekpatroon in" },
-  { id: "net", name: "Net", icon: "🔌", desc: "Draai tegels om het netwerk te verbinden" },
-  { id: "netslide", name: "Netslide", icon: "↔️", desc: "Schuif rijen en kolommen om te verbinden" },
-  { id: "palisade", name: "Palisade", icon: "🧱", desc: "Verdeel het grid in gebieden" },
-  { id: "pattern", name: "Pattern", icon: "■", desc: "Nonogram - vul het patroon in" },
-  { id: "pearl", name: "Pearl", icon: "⚪", desc: "Teken een lus door witte en zwarte parels" },
-  { id: "pegs", name: "Pegs", icon: "⚫", desc: "Spring over pinnen tot er één overblijft" },
-  { id: "range", name: "Range", icon: "🟧", desc: "Plaats blokken op de juiste afstand" },
-  { id: "rect", name: "Rectangles", icon: "▭", desc: "Verdeel het grid in rechthoeken" },
-  { id: "samegame", name: "Same Game", icon: "🟥", desc: "Verwijder groepen gelijke kleuren" },
-  { id: "signpost", name: "Signpost", icon: "↗️", desc: "Volg de pijlen in de juiste volgorde" },
-  { id: "singles", name: "Singles", icon: "1️⃣", desc: "Verwijder dubbele getallen" },
-  { id: "sixteen", name: "Sixteen", icon: "4️⃣", desc: "Schuifpuzzel - schuif rijen en kolommen" },
-  { id: "slant", name: "Slant", icon: "╱", desc: "Vul diagonale lijnen in elk vakje" },
-  { id: "solo", name: "Solo", icon: "9️⃣", desc: "Sudoku" },
-  { id: "tents", name: "Tents", icon: "⛺", desc: "Plaats tenten naast bomen" },
-  { id: "towers", name: "Towers", icon: "🏗️", desc: "Plaats torens van verschillende hoogtes" },
-  { id: "tracks", name: "Tracks", icon: "🛤️", desc: "Leg een treinspoor van A naar B" },
-  { id: "twiddle", name: "Twiddle", icon: "🔀", desc: "Draai groepen tegels om te sorteren" },
-  { id: "undead", name: "Undead", icon: "🧛", desc: "Plaats vampieren, zombies en geesten" },
-  { id: "unequal", name: "Unequal", icon: "><", desc: "Latijns vierkant met ongelijkheidstekens" },
-  { id: "unruly", name: "Unruly", icon: "◻◼", desc: "Vul zwart en wit in zonder drie op rij" },
-  { id: "untangle", name: "Untangle", icon: "🕸️", desc: "Ontwar het netwerk zonder kruisingen" }
+  { id: "blackbox", name: "Black Box", icon: "⬛", desc: "Vind verborgen ballen door stralen te schieten", cats: ["Logica"] },
+  { id: "bridges", name: "Bridges", icon: "🌉", desc: "Verbind eilanden met bruggen", cats: ["Netwerk", "Logica"] },
+  { id: "cube", name: "Cube", icon: "🟦", desc: "Rol een kubus over een grid", cats: ["Ruimtelijk"] },
+  { id: "dominosa", name: "Dominosa", icon: "🎲", desc: "Leg dominostenen op het grid", cats: ["Logica", "Getallen"] },
+  { id: "fifteen", name: "Fifteen", icon: "🔢", desc: "Schuifpuzzel - sorteer de nummers", cats: ["Ruimtelijk"] },
+  { id: "filling", name: "Filling", icon: "🟩", desc: "Vul het grid met getallen", cats: ["Getallen", "Logica"] },
+  { id: "flip", name: "Flip", icon: "🔄", desc: "Draai alle tegels naar dezelfde kleur", cats: ["Logica"] },
+  { id: "flood", name: "Flood", icon: "🎨", desc: "Kleur het hele bord in zo min mogelijk zetten", cats: ["Actie", "Patronen"] },
+  { id: "galaxies", name: "Galaxies", icon: "🌌", desc: "Verdeel het grid in symmetrische gebieden", cats: ["Ruimtelijk", "Logica"] },
+  { id: "guess", name: "Guess", icon: "🧠", desc: "Raad de kleurcode (Mastermind)", cats: ["Logica"] },
+  { id: "inertia", name: "Inertia", icon: "💎", desc: "Verzamel edelstenen, vermijd mijnen", cats: ["Actie", "Ruimtelijk"] },
+  { id: "keen", name: "Keen", icon: "✖️", desc: "Latijns vierkant met rekenkundige hints", cats: ["Getallen", "Logica"] },
+  { id: "lightup", name: "Light Up", icon: "💡", desc: "Plaats lampen om het hele grid te verlichten", cats: ["Logica"] },
+  { id: "loopy", name: "Loopy", icon: "➰", desc: "Teken een enkele lus langs de randen", cats: ["Patronen", "Logica"] },
+  { id: "magnets", name: "Magnets", icon: "🧲", desc: "Plaats magneten met + en - polen", cats: ["Logica"] },
+  { id: "map", name: "Map", icon: "🗺️", desc: "Kleur de kaart met vier kleuren", cats: ["Patronen", "Logica"] },
+  { id: "mines", name: "Mines", icon: "💣", desc: "Klassiek mijnenveger", cats: ["Logica", "Actie"] },
+  { id: "mosaic", name: "Mosaic", icon: "🟪", desc: "Vul een mozaïekpatroon in", cats: ["Patronen", "Logica"] },
+  { id: "net", name: "Net", icon: "🔌", desc: "Draai tegels om het netwerk te verbinden", cats: ["Netwerk", "Ruimtelijk"] },
+  { id: "netslide", name: "Netslide", icon: "↔️", desc: "Schuif rijen en kolommen om te verbinden", cats: ["Netwerk", "Ruimtelijk"] },
+  { id: "palisade", name: "Palisade", icon: "🧱", desc: "Verdeel het grid in gebieden", cats: ["Ruimtelijk", "Logica"] },
+  { id: "pattern", name: "Pattern", icon: "■", desc: "Nonogram - vul het patroon in", cats: ["Patronen", "Logica"] },
+  { id: "pearl", name: "Pearl", icon: "⚪", desc: "Teken een lus door witte en zwarte parels", cats: ["Patronen", "Logica"] },
+  { id: "pegs", name: "Pegs", icon: "⚫", desc: "Spring over pinnen tot er één overblijft", cats: ["Actie", "Logica"] },
+  { id: "range", name: "Range", icon: "🟧", desc: "Plaats blokken op de juiste afstand", cats: ["Logica", "Getallen"] },
+  { id: "rect", name: "Rectangles", icon: "▭", desc: "Verdeel het grid in rechthoeken", cats: ["Ruimtelijk", "Getallen"] },
+  { id: "samegame", name: "Same Game", icon: "🟥", desc: "Verwijder groepen gelijke kleuren", cats: ["Actie", "Patronen"] },
+  { id: "signpost", name: "Signpost", icon: "↗️", desc: "Volg de pijlen in de juiste volgorde", cats: ["Logica", "Getallen"] },
+  { id: "singles", name: "Singles", icon: "1️⃣", desc: "Verwijder dubbele getallen", cats: ["Getallen", "Logica"] },
+  { id: "sixteen", name: "Sixteen", icon: "4️⃣", desc: "Schuifpuzzel - schuif rijen en kolommen", cats: ["Ruimtelijk"] },
+  { id: "slant", name: "Slant", icon: "╱", desc: "Vul diagonale lijnen in elk vakje", cats: ["Patronen", "Logica"] },
+  { id: "solo", name: "Solo", icon: "9️⃣", desc: "Sudoku", cats: ["Getallen", "Logica"] },
+  { id: "tents", name: "Tents", icon: "⛺", desc: "Plaats tenten naast bomen", cats: ["Logica", "Ruimtelijk"] },
+  { id: "towers", name: "Towers", icon: "🏗️", desc: "Plaats torens van verschillende hoogtes", cats: ["Getallen", "Logica"] },
+  { id: "tracks", name: "Tracks", icon: "🛤️", desc: "Leg een treinspoor van A naar B", cats: ["Patronen", "Logica"] },
+  { id: "twiddle", name: "Twiddle", icon: "🔀", desc: "Draai groepen tegels om te sorteren", cats: ["Ruimtelijk"] },
+  { id: "undead", name: "Undead", icon: "🧛", desc: "Plaats vampieren, zombies en geesten", cats: ["Logica", "Getallen"] },
+  { id: "unequal", name: "Unequal", icon: "><", desc: "Latijns vierkant met ongelijkheidstekens", cats: ["Getallen", "Logica"] },
+  { id: "unruly", name: "Unruly", icon: "◻◼", desc: "Vul zwart en wit in zonder drie op rij", cats: ["Patronen", "Logica"] },
+  { id: "untangle", name: "Untangle", icon: "🕸️", desc: "Ontwar het netwerk zonder kruisingen", cats: ["Netwerk", "Ruimtelijk"] }
 ];
 
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
+const filtersEl = document.getElementById("filters");
+let activeFilter = null;
+
+const scores = JSON.parse(localStorage.getItem("puzzel-scores") || "{}");
+
+const allBtn = document.createElement("button");
+allBtn.className = "filter-btn active";
+allBtn.textContent = "Alle";
+allBtn.addEventListener("click", () => setFilter(null));
+filtersEl.appendChild(allBtn);
+
+Object.keys(categories).forEach(cat => {
+  const btn = document.createElement("button");
+  btn.className = "filter-btn";
+  btn.textContent = cat;
+  btn.addEventListener("click", () => setFilter(cat));
+  filtersEl.appendChild(btn);
+});
+
+function setFilter(cat) {
+  activeFilter = cat;
+  document.querySelectorAll(".filter-btn").forEach(b => {
+    b.classList.toggle("active", cat === null ? b.textContent === "Alle" : b.textContent === cat);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = search.value.toLowerCase();
+  document.querySelectorAll(".card").forEach(c => {
+    const matchesSearch = !q || c.dataset.name.includes(q) || c.querySelector(".desc").textContent.toLowerCase().includes(q);
+    const matchesCat = !activeFilter || c.dataset.cats.includes(activeFilter);
+    c.classList.toggle("hidden", !matchesSearch || !matchesCat);
+  });
+}
 
 puzzles.forEach(p => {
   const a = document.createElement("a");
   a.href = `puzzles/${p.id}.html`;
   a.className = "card";
   a.dataset.name = p.name.toLowerCase();
-  a.innerHTML = `<span class="icon">${p.icon}</span><span class="name">${p.name}</span><span class="desc">${p.desc}</span>`;
+  a.dataset.cats = p.cats.join(",");
+
+  const tagsHtml = p.cats.map(c => `<span class="tag">${c}</span>`).join("");
+  const bestTime = scores[p.id];
+  const bestHtml = bestTime ? `<span class="best-time">Beste: ${bestTime}</span>` : "";
+
+  a.innerHTML = `<span class="icon">${p.icon}</span><span class="name">${p.name}</span><span class="desc">${p.desc}</span><div class="tags">${tagsHtml}</div>${bestHtml}`;
   grid.appendChild(a);
 });
 
-search.addEventListener("input", () => {
-  const q = search.value.toLowerCase();
-  document.querySelectorAll(".card").forEach(c => {
-    c.classList.toggle("hidden", !c.dataset.name.includes(q) && !c.querySelector(".desc").textContent.toLowerCase().includes(q));
-  });
-});
+search.addEventListener("input", applyFilters);
 </script>
 </body>
 </html>

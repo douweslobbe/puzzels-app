@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/svg+xml" href="../favicon.svg"><title>Tents - Puzzels</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<title>Tents - Puzzels</title>
 <script defer src="tents.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,38 +14,53 @@
     background: #0f172a;
     color: #e2e8f0;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .topbar {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 0.75rem 1rem;
-    background: #1e293b;
+    padding: 0.6rem 1.25rem;
+    background: linear-gradient(135deg, #1e293b 0%, #1a2332 100%);
     border-bottom: 1px solid #334155;
   }
 
   .topbar a {
     color: #818cf8;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color 0.15s;
   }
 
   .topbar a:hover { color: #a5b4fc; }
 
   .topbar h1 {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.15rem;
+    font-weight: 700;
     color: #f8fafc;
+    letter-spacing: -0.01em;
   }
 
-  main { text-align: center; }
+  main {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 1rem 1.5rem;
+  }
 
+  /* ---- Menu bar ---- */
   #gamemenu {
-    margin: 0.75rem auto 0.5rem;
-    font-weight: bold;
-    font-size: 0.8em;
+    margin: 0.5rem 0;
+    font-weight: 600;
+    font-size: 0.78em;
     text-align: center;
   }
 
@@ -54,33 +70,42 @@
     flex-wrap: wrap;
     justify-content: center;
     margin: 0;
-    padding: 0.5px;
+    padding: 0;
+    gap: 2px;
+  }
+
+  #gamemenu > ul > li {
+    border-radius: 6px;
   }
 
   #gamemenu li {
     cursor: default;
-    border: 1px solid #475569;
-    margin: -0.5px;
+    border: 1px solid #334155;
+    margin: 0;
     position: relative;
-    color: #e2e8f0;
+    color: #cbd5e1;
+    background: #1e293b;
+    transition: background 0.12s;
   }
 
   #gamemenu li[role=separator] {
-    width: 1.5em;
+    width: 0.75em;
     border: 0;
+    background: none;
   }
 
   #gamemenu li > * {
-    padding: 0.2em 0.75em;
+    padding: 0.35em 0.85em;
     margin: 0;
     display: block;
   }
 
-  #gamemenu :disabled { color: rgba(255,255,255,0.3); }
+  #gamemenu :disabled { color: rgba(255,255,255,0.2); }
 
   #gamemenu li > :hover:not(:disabled),
   #gamemenu li > .focus-within {
-    background: rgba(255,255,255,0.15);
+    background: #334155;
+    color: #f1f5f9;
   }
 
   @media (max-width:18em) {
@@ -90,12 +115,16 @@
   #gamemenu ul ul {
     display: none;
     position: absolute;
-    top: 100%;
+    top: calc(100% + 2px);
     left: 0;
     flex-direction: column;
     background: #1e293b;
-    border: 1px solid #475569;
+    border: 1px solid #334155;
+    border-radius: 6px;
     z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    padding: 2px;
+    gap: 0;
   }
 
   #gamemenu ul ul.left { left: inherit; right: 0; }
@@ -103,10 +132,12 @@
   #gamemenu li li {
     white-space: nowrap;
     text-align: left;
+    border: none;
+    border-radius: 4px;
   }
 
-  #gamemenu ul ul ul { top: 0; left: 100%; }
-  #gamemenu ul ul ul.left { left: inherit; right: 100%; }
+  #gamemenu ul ul ul { top: 0; left: calc(100% + 2px); }
+  #gamemenu ul ul ul.left { left: inherit; right: calc(100% + 2px); }
 
   #gamemenu :hover > ul,
   #gamemenu .focus-within > ul {
@@ -138,13 +169,29 @@
   #gamemenu .tick:not(:checked) { color: transparent; }
 
   #gamemenu li > div:after {
-    content: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='10'%3E%3Cpolygon%20points='0,5,10,5,5,10'%20fill='%23e2e8f0'/%3E%3C/svg%3E");
+    content: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='10'%3E%3Cpolygon%20points='0,4,10,4,5,9'%20fill='%23818cf8'/%3E%3C/svg%3E");
     margin-left: 0.5em;
   }
 
   #gamemenu li li > div:after {
-    content: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='10'%3E%3Cpolygon%20points='0,0,10,5,0,10'%20fill='%23e2e8f0'/%3E%3C/svg%3E");
+    content: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='10'%3E%3Cpolygon%20points='0,0,10,5,0,10'%20fill='%23818cf8'/%3E%3C/svg%3E");
     float: right;
+  }
+
+  /* ---- Canvas area ---- */
+  #resizable {
+    position: relative;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(99,102,241,0.15);
+  }
+
+  #puzzlecanvas {
+    display: block;
+    width: 100%;
+    font-family: sans-serif;
+    border-radius: 10px 10px 0 0;
   }
 
   #statusbar {
@@ -152,92 +199,117 @@
     text-align: left;
     white-space: nowrap;
     text-overflow: ellipsis;
-    background: #334155;
-    color: #e2e8f0;
-    border: 1px solid #475569;
-    height: 1.4em;
-    font-size: 0.9em;
-    padding: 0 0.3em;
-  }
-
-  #dlgdimmer {
-    width: 100%; height: 100%;
-    background: #000;
-    position: fixed;
-    opacity: 0.5;
-    left: 0; top: 0;
-    z-index: 99;
-  }
-
-  #dlgform {
-    width: 66.6667vw;
     background: #1e293b;
-    color: #e2e8f0;
-    position: absolute;
-    border: 1px solid #475569;
-    border-radius: 8px;
-    padding: 20px;
-    top: 10vh;
-    left: 16.6667vw;
-    z-index: 100;
+    color: #94a3b8;
+    border-top: 1px solid #334155;
+    height: 1.6em;
+    font-size: 0.8em;
+    padding: 0.15em 0.5em;
+    font-weight: 500;
   }
-
-  #dlgform h2 { margin-top: 0; }
-
-  #dlgform input[type="text"] {
-    background: #0f172a;
-    color: #e2e8f0;
-    border: 1px solid #475569;
-    border-radius: 4px;
-    padding: 0.3em 0.5em;
-  }
-
-  #dlgform button {
-    background: #6366f1;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 0.3em 1em;
-    cursor: pointer;
-    margin: 0.2em;
-  }
-
-  #dlgform button:hover { background: #818cf8; }
 
   #resizehandle {
     position: absolute;
     z-index: 1;
     bottom: 0; right: 0;
     cursor: se-resize;
-    color: #64748b;
+    color: #475569;
+    transition: color 0.15s;
   }
 
-  #resizable {
-    position: relative;
-    margin: 0.75rem auto;
-  }
+  #resizehandle:hover { color: #818cf8; }
 
-  #puzzlecanvas {
-    display: block;
-    width: 100%;
-    font-family: sans-serif;
+  /* ---- Permalink ---- */
+  .permalink-row {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
   }
-
-  #apology {
-    padding: 0 1em;
-    margin: 1em;
-    border: 2px solid #ef4444;
-    border-radius: 8px;
-    color: #fca5a5;
-  }
-
-  .apology-title { text-align: center; }
 
   #permalink-desc, #permalink-seed {
-    color: #818cf8;
+    color: #64748b;
     text-decoration: none;
-    font-size: 0.85rem;
-    margin: 0 0.3em;
+    font-size: 0.75rem;
+    transition: color 0.15s;
+  }
+
+  #permalink-desc:hover, #permalink-seed:hover { color: #818cf8; }
+
+  /* ---- Dialogs ---- */
+  #dlgdimmer {
+    width: 100%; height: 100%;
+    background: #000;
+    position: fixed;
+    opacity: 0.6;
+    left: 0; top: 0;
+    z-index: 99;
+    backdrop-filter: blur(2px);
+  }
+
+  #dlgform {
+    width: min(500px, 85vw);
+    background: #1e293b;
+    color: #e2e8f0;
+    position: fixed;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 1.5rem;
+    top: 15vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  }
+
+  #dlgform h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #f8fafc;
+  }
+
+  #dlgform input[type="text"] {
+    background: #0f172a;
+    color: #e2e8f0;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 0.4em 0.6em;
+    font-size: 0.9em;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  #dlgform input[type="text"]:focus { border-color: #6366f1; }
+
+  #dlgform button {
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4em 1.2em;
+    cursor: pointer;
+    margin: 0.3em;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+
+  #dlgform button:hover { background: #818cf8; }
+
+  /* ---- Loading state ---- */
+  #apology {
+    padding: 1.5em;
+    margin: 2em auto;
+    max-width: 400px;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    background: #1e293b;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .apology-title {
+    text-align: center;
+    color: #e2e8f0;
   }
 
   @media print {
@@ -276,16 +348,16 @@
       <path d="M8.5,1.5l-7,7m7,-4l-4,4m4,-1l-1,1" stroke="currentColor" stroke-linecap="round"></path>
     </svg>
   </div>
-  <p>
+  <div class="permalink-row">
     <a id="permalink-desc">Link by game ID</a>
     <a id="permalink-seed">Link by random seed</a>
-  </p>
+  </div>
 </main>
 <div id="apology">
-  <p class="apology-title"><strong>WebAssembly wordt geladen...</strong></p>
-  <p>Als dit bericht zichtbaar blijft, ondersteunt je browser mogelijk geen WebAssembly.</p>
+  <p class="apology-title"><strong>Laden...</strong></p>
+  <p>Even geduld, de puzzel wordt geladen.</p>
 </div>
 
-<script src="scores.js"></script></body>
+<script src="scores.js"></script>
+</body>
 </html>
-

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puzzels - wesl.nl</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid #1e293b;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 0.25rem;
+  }
+
+  header p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+  }
+
+  .search-container {
+    max-width: 400px;
+    margin: 1.5rem auto 0;
+  }
+
+  #search {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search:focus {
+    border-color: #6366f1;
+  }
+
+  #search::placeholder {
+    color: #64748b;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+  }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: #e2e8f0;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: #6366f1;
+    background: #253049;
+  }
+
+  .card .icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .card .name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .card .desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.3;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    border-top: 1px solid #1e293b;
+  }
+
+  footer a {
+    color: #818cf8;
+    text-decoration: none;
+  }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Puzzels</h1>
+  <p>40 puzzels van Simon Tatham's Portable Puzzle Collection</p>
+  <div class="search-container">
+    <input type="text" id="search" placeholder="Zoek een puzzel..." autocomplete="off">
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  Gebaseerd op <a href="https://www.chiark.greenend.org.uk/~sgtatham/puzzles/" target="_blank" rel="noopener">Simon Tatham's Portable Puzzle Collection</a> (MIT-licentie)
+</footer>
+
+<script>
+const puzzles = [
+  { id: "blackbox", name: "Black Box", icon: "⬛", desc: "Vind verborgen ballen door stralen te schieten" },
+  { id: "bridges", name: "Bridges", icon: "🌉", desc: "Verbind eilanden met bruggen" },
+  { id: "cube", name: "Cube", icon: "🟦", desc: "Rol een kubus over een grid" },
+  { id: "dominosa", name: "Dominosa", icon: "🎲", desc: "Leg dominostenen op het grid" },
+  { id: "fifteen", name: "Fifteen", icon: "🔢", desc: "Schuifpuzzel - sorteer de nummers" },
+  { id: "filling", name: "Filling", icon: "🟩", desc: "Vul het grid met getallen" },
+  { id: "flip", name: "Flip", icon: "🔄", desc: "Draai alle tegels naar dezelfde kleur" },
+  { id: "flood", name: "Flood", icon: "🎨", desc: "Kleur het hele bord in zo min mogelijk zetten" },
+  { id: "galaxies", name: "Galaxies", icon: "🌌", desc: "Verdeel het grid in symmetrische gebieden" },
+  { id: "guess", name: "Guess", icon: "🧠", desc: "Raad de kleurcode (Mastermind)" },
+  { id: "inertia", name: "Inertia", icon: "💎", desc: "Verzamel edelstenen, vermijd mijnen" },
+  { id: "keen", name: "Keen", icon: "✖️", desc: "Latijns vierkant met rekenkundige hints" },
+  { id: "lightup", name: "Light Up", icon: "💡", desc: "Plaats lampen om het hele grid te verlichten" },
+  { id: "loopy", name: "Loopy", icon: "➰", desc: "Teken een enkele lus langs de randen" },
+  { id: "magnets", name: "Magnets", icon: "🧲", desc: "Plaats magneten met + en - polen" },
+  { id: "map", name: "Map", icon: "🗺️", desc: "Kleur de kaart met vier kleuren" },
+  { id: "mines", name: "Mines", icon: "💣", desc: "Klassiek mijnenveger" },
+  { id: "mosaic", name: "Mosaic", icon: "🟪", desc: "Vul een mozaïekpatroon in" },
+  { id: "net", name: "Net", icon: "🔌", desc: "Draai tegels om het netwerk te verbinden" },
+  { id: "netslide", name: "Netslide", icon: "↔️", desc: "Schuif rijen en kolommen om te verbinden" },
+  { id: "palisade", name: "Palisade", icon: "🧱", desc: "Verdeel het grid in gebieden" },
+  { id: "pattern", name: "Pattern", icon: "■", desc: "Nonogram - vul het patroon in" },
+  { id: "pearl", name: "Pearl", icon: "⚪", desc: "Teken een lus door witte en zwarte parels" },
+  { id: "pegs", name: "Pegs", icon: "⚫", desc: "Spring over pinnen tot er één overblijft" },
+  { id: "range", name: "Range", icon: "🟧", desc: "Plaats blokken op de juiste afstand" },
+  { id: "rect", name: "Rectangles", icon: "▭", desc: "Verdeel het grid in rechthoeken" },
+  { id: "samegame", name: "Same Game", icon: "🟥", desc: "Verwijder groepen gelijke kleuren" },
+  { id: "signpost", name: "Signpost", icon: "↗️", desc: "Volg de pijlen in de juiste volgorde" },
+  { id: "singles", name: "Singles", icon: "1️⃣", desc: "Verwijder dubbele getallen" },
+  { id: "sixteen", name: "Sixteen", icon: "4️⃣", desc: "Schuifpuzzel - schuif rijen en kolommen" },
+  { id: "slant", name: "Slant", icon: "╱", desc: "Vul diagonale lijnen in elk vakje" },
+  { id: "solo", name: "Solo", icon: "9️⃣", desc: "Sudoku" },
+  { id: "tents", name: "Tents", icon: "⛺", desc: "Plaats tenten naast bomen" },
+  { id: "towers", name: "Towers", icon: "🏗️", desc: "Plaats torens van verschillende hoogtes" },
+  { id: "tracks", name: "Tracks", icon: "🛤️", desc: "Leg een treinspoor van A naar B" },
+  { id: "twiddle", name: "Twiddle", icon: "🔀", desc: "Draai groepen tegels om te sorteren" },
+  { id: "undead", name: "Undead", icon: "🧛", desc: "Plaats vampieren, zombies en geesten" },
+  { id: "unequal", name: "Unequal", icon: "><", desc: "Latijns vierkant met ongelijkheidstekens" },
+  { id: "unruly", name: "Unruly", icon: "◻◼", desc: "Vul zwart en wit in zonder drie op rij" },
+  { id: "untangle", name: "Untangle", icon: "🕸️", desc: "Ontwar het netwerk zonder kruisingen" }
+];
+
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+
+puzzles.forEach(p => {
+  const a = document.createElement("a");
+  a.href = `puzzles/${p.id}.html`;
+  a.className = "card";
+  a.dataset.name = p.name.toLowerCase();
+  a.innerHTML = `<span class="icon">${p.icon}</span><span class="name">${p.name}</span><span class="desc">${p.desc}</span>`;
+  grid.appendChild(a);
+});
+
+search.addEventListener("input", () => {
+  const q = search.value.toLowerCase();
+  document.querySelectorAll(".card").forEach(c => {
+    c.classList.toggle("hidden", !c.dataset.name.includes(q) && !c.querySelector(".desc").textContent.toLowerCase().includes(q));
+  });
+});
+</script>
+</body>
+</html>
